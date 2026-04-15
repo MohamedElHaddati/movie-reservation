@@ -1,0 +1,96 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cinebook_network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - cinebook_network
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
+    networks:
+      - cinebook_network
+
+  reservation_service:
+    build: ./reservation_service
+    env_file: .env
+    ports:
+      - "8001:8001"
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - tickets_data:/tickets
+    command: sh -c "python manage.py migrate && python manage.py seed_data && python manage.py runserver 0.0.0.0:8001"
+    networks:
+      - cinebook_network
+
+  notification_service:
+    build: ./notification_service
+    env_file: .env
+    ports:
+      - "8002:8002"
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - tickets_data:/tickets
+    command: python -m notification.consumer
+    networks:
+      - cinebook_network
+
+  gateway:
+    build: ./gateway
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      reservation_service:
+        condition: service_started
+    command: python manage.py runserver 0.0.0.0:8000
+    networks:
+      - cinebook_network
+
+  web_app:
+    build: ./web_app
+    env_file: .env
+    ports:
+      - "3000:3000"
+    command: python manage.py runserver 0.0.0.0:3000
+    networks:
+      - cinebook_network
+
+volumes:
+  postgres_data:
+  tickets_data:
+
+networks:
+  cinebook_network:
+    driver: bridge

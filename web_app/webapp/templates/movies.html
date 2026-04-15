@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Movies</h2>
+{% if movies %}
+  {% for movie in movies %}
+    <div class="card">
+      <strong>{{ movie.title }}</strong> ({{ movie.format }})<br/>
+      Genre: {{ movie.genre }}<br/>
+      Duration: {{ movie.duration }} min
+    </div>
+  {% endfor %}
+{% else %}
+  <p>No movies available. Ensure reservation service is seeded.</p>
+{% endif %}
+
+<div class="card">
+  <h3>Continue to checkout</h3>
+  <form method="get" action="/checkout/">
+    <label>Showtime ID <input type="number" name="showtime_id" required /></label><br/><br/>
+    <label>Seat IDs (repeatable query key, e.g. ?seat_ids=1&seat_ids=2):</label><br/>
+    <input type="number" name="seat_ids" required />
+    <button type="submit">Go to checkout</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Seats for Showtime #{{ showtime_id }}</h2>
+<ul>
+{% for seat in seats %}
+  <li class="{% if seat.is_taken %}taken{% endif %}">
+    {{ seat.seat_number }} {% if seat.is_taken %}(taken){% endif %}
+  </li>
+{% empty %}
+  <li>No seats found.</li>
+{% endfor %}
+</ul>
+{% endblock %}
