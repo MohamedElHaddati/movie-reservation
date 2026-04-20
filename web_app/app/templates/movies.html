@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Movies</h1>
+{% for card in movie_cards %}
+  <div class="card">
+    <h3>{{ card.movie.title }}</h3>
+    <p><strong>Genre:</strong> {{ card.movie.genre }} | <strong>Duration:</strong> {{ card.movie.duration_min }} min | <strong>Format:</strong> {{ card.movie.format }}</p>
+    <p><strong>Showtimes:</strong></p>
+    {% for showtime in card.showtimes %}
+      <div>
+        {{ showtime.datetime }} ({{ showtime.hall }})
+        <a href="/showtimes/{{ showtime.id }}/seats/">Select seats</a>
+      </div>
+    {% empty %}
+      <div>No showtimes yet.</div>
+    {% endfor %}
+  </div>
+{% empty %}
+  <p>No movies available.</p>
+{% endfor %}
+{% endblock %}

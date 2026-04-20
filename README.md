@@ -1,31 +1,27 @@
-# Cinebook - Movie Reservation Microservices
+# CineBook
 
-Self-hosted movie ticket reservation system built with Django microservices, PostgreSQL, RabbitMQ, Mailhog, and Docker Compose.
+CineBook is a self-hosted movie ticket reservation system built as event-driven microservices with Django, PostgreSQL, RabbitMQ, and Docker Compose.
 
-## Services
-- `gateway` (port `8000`) - validates JWT and proxies traffic
-- `reservation_service` (port `8001`) - movies/showtimes/seats/reservations API
-- `notification_service` (port `8002`) - RabbitMQ consumer, PDF generation, email sending
-- `web_app` (port `3000`) - user web interface
-- `db` - PostgreSQL 15
-- `rabbitmq` - queue + management UI (`http://localhost:15672`)
-- `mailhog` - email inbox UI (`http://localhost:8025`)
+## Prerequisites
 
-## Quick start
-1. Clone repository.
-2. Copy environment template:
-   ```bash
-   cp .env.example .env
-   ```
-3. Start stack:
-   ```bash
-   docker compose up --build
-   ```
-4. Open app at `http://localhost:3000`.
-5. Open RabbitMQ UI at `http://localhost:15672`.
-6. Open Mailhog UI at `http://localhost:8025`.
+- Docker
+- Docker Compose
 
-## Notes
-- Ticket PDFs are saved in shared Docker volume mounted at `/tickets`.
-- Queue used for reservation confirmation events: `reservation_confirmed`.
-- JWT token must contain a `role` claim (`admin` or `client`) for gateway authorization.
+## Setup
+
+1. Clone this repository.
+2. Copy environment variables:
+   - `cp .env.example .env` (Linux/macOS)
+   - `copy .env.example .env` (Windows)
+3. Start the stack:
+   - `docker compose up --build`
+4. Seed initial data:
+   - `docker compose exec reservation_service python manage.py seed_data`
+
+## URLs
+
+| Service | URL |
+|---|---|
+| Web app | http://localhost:3000 |
+| RabbitMQ UI | http://localhost:15672 |
+| Mailhog inbox | http://localhost:8025 |

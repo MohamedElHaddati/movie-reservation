@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Select seats</h1>
+<p>Showtime #{{ showtime.id }} - {{ showtime.datetime }} ({{ showtime.hall }})</p>
+
+<form method="post" action="/showtimes/{{ showtime.id }}/checkout/">
+  {% csrf_token %}
+  {% for seat in seats %}
+    <label class="seat {% if seat.is_taken %}taken{% else %}available{% endif %}">
+      {% if seat.is_taken %}
+        {{ seat.seat_number }} (Taken)
+      {% else %}
+        <input type="checkbox" name="seat_ids" value="{{ seat.id }}" />
+        {{ seat.seat_number }}
+      {% endif %}
+    </label>
+  {% empty %}
+    <p>No seats found.</p>
+  {% endfor %}
+  <div style="margin-top: 16px;">
+    <button type="submit">Continue to checkout</button>
+  </div>
+</form>
+{% endblock %}

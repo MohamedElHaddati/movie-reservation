@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Checkout</h1>
+<p>Showtime #{{ showtime.id }} - {{ showtime.datetime }} ({{ showtime.hall }})</p>
+
+<h3>Selected seats</h3>
+<ul>
+  {% for seat in selected_seats %}
+    <li>{{ seat.seat_number }}</li>
+  {% endfor %}
+</ul>
+
+<form method="post" action="/showtimes/{{ showtime.id }}/confirmation/">
+  {% csrf_token %}
+  {% for seat_id in selected_seat_ids %}
+    <input type="hidden" name="seat_ids" value="{{ seat_id }}" />
+  {% endfor %}
+  <button type="submit">Confirm reservation</button>
+</form>
+{% endblock %}
