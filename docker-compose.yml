@@ -37,6 +37,10 @@ services:
         condition: service_healthy
     volumes:
       - tickets_data:/tickets
+    networks:
+      default:
+        aliases:
+          - reservation-service
 
   notification_service:
     build: ./notification_service

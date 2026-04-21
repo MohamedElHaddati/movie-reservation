@@ -2,10 +2,14 @@ from django.conf import settings
 from django.core.mail import EmailMessage
 
 
-def send(reservation, ticket_path):
+def send(reservation, ticket_path, seats):
+    recipient_email = (reservation.user.email or "").strip()
+    if not recipient_email:
+        raise ValueError(f"Reservation user {reservation.user_id} has no email address")
+
     movie_title = reservation.showtime.movie.title
     showtime_text = reservation.showtime.datetime.strftime("%Y-%m-%d %H:%M")
-    seats = ", ".join(sorted(seat.seat_number for seat in reservation.seats.all()))
+    seats_text = ", ".join(sorted(seat.seat_number for seat in seats))
     booking_ref = f"CB-{reservation.id:06d}"
 
     subject = f"Your CineBook ticket — {movie_title}"
@@ -16,7 +20,7 @@ def send(reservation, ticket_path):
         f"Movie: {movie_title}\n"
         f"Showtime: {showtime_text}\n"
         f"Hall: {reservation.showtime.hall}\n"
-        f"Seats: {seats}\n\n"
+        f"Seats: {seats_text}\n\n"
         "Enjoy your movie!"
     )
 
@@ -24,7 +28,7 @@ def send(reservation, ticket_path):
         subject=subject,
         body=body,
         from_email=settings.DEFAULT_FROM_EMAIL,
-        to=[reservation.user.email],
+        to=[recipient_email],
     )
     message.attach_file(ticket_path)
     message.send(fail_silently=False)

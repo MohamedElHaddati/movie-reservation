@@ -7,4 +7,4 @@ until nc -z "${RABBITMQ_HOST}" "${RABBITMQ_PORT}"; do
 done
 
 echo "RabbitMQ is available. Starting consumer..."
-python app/consumer.py
+python -m app.consumer

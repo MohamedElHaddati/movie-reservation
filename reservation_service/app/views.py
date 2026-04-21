@@ -1,19 +1,20 @@
-import logging
-import threading
 from decimal import Decimal
 
 from django.db import transaction
-from rest_framework import status, viewsets
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 from rest_framework.response import Response
 
 from . import publisher
 from .models import Movie, Payment, Reservation, Seat, Showtime
-from .serializers import MovieSerializer, ReservationSerializer, SeatSerializer, ShowtimeSerializer
-
-logger = logging.getLogger(__name__)
-
+from .serializers import (
+    MovieSerializer,
+    ReservationSerializer,
+    SeatSerializer,
+    ShowtimeSerializer,
+    UserRegistrationSerializer,
+)
 
 class AdminOrReadOnly(BasePermission):
     def has_permission(self, request, view):
@@ -91,14 +92,12 @@ class ReservationViewSet(viewsets.ModelViewSet):
                 },
             )
             reservation.seats.update(is_taken=True)
-
-            def _publish():
-                try:
-                    publisher.publish_reservation_confirmed(reservation.id)
-                except Exception:
-                    logger.exception("Failed to publish reservation_confirmed for %s", reservation.id)
-
-            threading.Thread(target=_publish, daemon=True).start()
+            transaction.on_commit(lambda reservation_id=reservation.id: publisher.publish_reservation_confirmed(reservation_id))
 
         serializer = self.get_serializer(reservation)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class RegisterView(generics.CreateAPIView):
+    serializer_class = UserRegistrationSerializer
+    permission_classes = [permissions.AllowAny]
