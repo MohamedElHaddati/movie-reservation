@@ -1,20 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Checkout</h1>
-<p>Showtime #{{ showtime.id }} - {{ showtime.datetime }} ({{ showtime.hall }})</p>
+<div class="mb-6">
+  <h1 class="text-3xl font-bold tracking-tight text-slate-900">Checkout</h1>
+  <p class="mt-2 text-sm text-slate-600">Showtime #{{ showtime.id }} · {{ showtime.datetime }} · {{ showtime.hall }}</p>
+</div>
 
-<h3>Selected seats</h3>
-<ul>
-  {% for seat in selected_seats %}
-    <li>{{ seat.seat_number }}</li>
-  {% endfor %}
-</ul>
+<div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+  <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Selected seats</h2>
+  <ul class="mt-3 flex flex-wrap gap-2">
+    {% for seat in selected_seats %}
+    <li class="rounded-full bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-700">{{ seat.seat_number }}</li>
+    {% endfor %}
+  </ul>
+</div>
 
 <form method="post" action="/showtimes/{{ showtime.id }}/confirmation/">
   {% csrf_token %}
   {% for seat_id in selected_seat_ids %}
     <input type="hidden" name="seat_ids" value="{{ seat_id }}" />
   {% endfor %}
-  <button type="submit">Confirm reservation</button>
+  <div class="mt-6 flex items-center justify-between">
+    <a href="/showtimes/{{ showtime.id }}/seats/" class="text-sm font-medium text-slate-600 hover:text-slate-900">Change seats</a>
+    <button
+      type="submit"
+      class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500"
+    >
+      Confirm reservation
+    </button>
+  </div>
 </form>
 {% endblock %}
