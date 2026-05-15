@@ -4,24 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CineBook</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 24px; }
-    .container { max-width: 960px; margin: 0 auto; }
-    .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
-    .seat { display: inline-block; margin: 4px; padding: 6px 10px; border-radius: 4px; border: 1px solid #ccc; }
-    .seat.taken { background: #f8d7da; border-color: #f5c2c7; color: #842029; }
-    .seat.available { background: #d1e7dd; border-color: #badbcc; color: #0f5132; }
-    .nav { margin-bottom: 16px; }
-    .nav a { margin-right: 12px; }
-    button { padding: 8px 12px; cursor: pointer; }
-  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div class="container">
-    <div class="nav">
-      <a href="/">Movies</a>
-      <a href="/logout/">Logout</a>
+<body class="min-h-screen bg-slate-100 text-slate-800">
+  <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+    {% if show_nav|default:True %}
+    <div class="mb-8 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-lg font-semibold text-slate-900">CineBook</span>
+          {% if request.session.username %}
+          <span class="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700">
+            {{ request.session.username }}
+          </span>
+          {% endif %}
+        </div>
+        <div class="flex items-center gap-4 text-sm">
+          <a href="/" class="font-medium text-slate-700 hover:text-indigo-600">Movies</a>
+          <a href="/reservations/" class="font-medium text-slate-700 hover:text-indigo-600">My reservations</a>
+          <a href="/logout/" class="font-medium text-slate-700 hover:text-rose-600">Logout</a>
+        </div>
+      </div>
     </div>
+    {% endif %}
     {% block content %}{% endblock %}
   </div>
 </body>

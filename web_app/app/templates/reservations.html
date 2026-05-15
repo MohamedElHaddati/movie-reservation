@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="mb-8">
+  <h1 class="text-3xl font-bold tracking-tight text-slate-900">My reservations</h1>
+  <p class="mt-2 text-sm text-slate-600">Track your upcoming and past bookings in one place.</p>
+</div>
+
+<section class="mb-10">
+  <div class="mb-4 flex items-center justify-between">
+    <h2 class="text-xl font-semibold text-slate-900">Upcoming</h2>
+    <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+      {{ upcoming_reservations|length }}
+    </span>
+  </div>
+  <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    {% for reservation in upcoming_reservations %}
+    <article class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      {% if reservation.showtime_details.movie.poster_url %}
+      <img
+        src="{{ reservation.showtime_details.movie.poster_url }}"
+        alt="{{ reservation.showtime_details.movie.title }} poster"
+        class="h-44 w-full object-cover"
+      />
+      {% else %}
+      <div class="flex h-44 w-full items-center justify-center bg-gradient-to-br from-indigo-500 to-violet-600">
+        <span class="text-5xl font-black text-white">{{ reservation.showtime_details.movie.title|slice:":1" }}</span>
+      </div>
+      {% endif %}
+      <div class="p-4">
+        <h3 class="line-clamp-2 text-base font-semibold text-slate-900">{{ reservation.showtime_details.movie.title }}</h3>
+        <p class="mt-2 text-sm text-slate-600">{{ reservation.showtime_details.display_datetime }} · {{ reservation.showtime_details.hall }}</p>
+        <p class="mt-1 text-sm text-slate-600">Seats: {{ reservation.seat_summary }}</p>
+        <div class="mt-4 flex items-center justify-between">
+          <span class="rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-indigo-700">{{ reservation.status|title }}</span>
+          <a href="/reservations/{{ reservation.id }}/" class="text-sm font-semibold text-indigo-600 hover:text-indigo-500">View details</a>
+        </div>
+      </div>
+    </article>
+    {% empty %}
+    <div class="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500 sm:col-span-2 xl:col-span-3">
+      No upcoming reservations yet.
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section>
+  <div class="mb-4 flex items-center justify-between">
+    <h2 class="text-xl font-semibold text-slate-900">Past</h2>
+    <span class="rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-700">
+      {{ past_reservations|length }}
+    </span>
+  </div>
+  <div class="space-y-3">
+    {% for reservation in past_reservations %}
+    <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h3 class="text-base font-semibold text-slate-900">{{ reservation.showtime_details.movie.title }}</h3>
+          <p class="mt-1 text-sm text-slate-600">{{ reservation.showtime_details.display_datetime }} · {{ reservation.showtime_details.hall }}</p>
+          <p class="mt-1 text-sm text-slate-600">Seats: {{ reservation.seat_summary }}</p>
+        </div>
+        <a
+          href="/reservations/{{ reservation.id }}/"
+          class="inline-flex w-fit rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:border-slate-400 hover:text-slate-900"
+        >
+          View details
+        </a>
+      </div>
+    </article>
+    {% empty %}
+    <div class="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+      No past reservations yet.
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

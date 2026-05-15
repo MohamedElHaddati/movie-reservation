@@ -62,6 +62,17 @@ class Reservation(models.Model):
         app_label = "app"
 
 
+class Ticket(models.Model):
+    reservation = models.OneToOneField(Reservation, on_delete=models.DO_NOTHING, related_name="+")
+    pdf_path = models.CharField(max_length=500)
+    generated_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = False
+        db_table = "app_ticket"
+        app_label = "app"
+
+
 class ReservationSeat(models.Model):
     reservation = models.ForeignKey(Reservation, on_delete=models.DO_NOTHING, db_column="reservation_id", related_name="+")
     seat = models.ForeignKey(Seat, on_delete=models.DO_NOTHING, db_column="seat_id", related_name="+")
@@ -108,6 +119,10 @@ def _process(ch, method, properties, body):
             raise ValueError(f"Reservation {reservation_id} has no seats")
 
         ticket_path = ticket_generator.generate(reservation, seats)
+        Ticket.objects.update_or_create(
+            reservation_id=reservation_id,
+            defaults={"pdf_path": ticket_path},
+        )
         email_sender.send(reservation, ticket_path, seats)
         ch.basic_ack(delivery_tag=method.delivery_tag)
         logger.info("Processed reservation %s", reservation_id)
