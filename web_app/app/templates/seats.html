@@ -1,24 +1,34 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Select seats</h1>
-<p>Showtime #{{ showtime.id }} - {{ showtime.datetime }} ({{ showtime.hall }})</p>
+<div class="mb-6">
+  <h1 class="text-3xl font-bold tracking-tight text-slate-900">Select seats</h1>
+  <p class="mt-2 text-sm text-slate-600">Showtime #{{ showtime.id }} · {{ showtime.datetime }} · {{ showtime.hall }}</p>
+</div>
 
 <form method="post" action="/showtimes/{{ showtime.id }}/checkout/">
   {% csrf_token %}
+  <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
   {% for seat in seats %}
-    <label class="seat {% if seat.is_taken %}taken{% else %}available{% endif %}">
+    <label class="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium {% if seat.is_taken %}border-rose-200 bg-rose-50 text-rose-700{% else %}border-emerald-200 bg-emerald-50 text-emerald-700{% endif %}">
       {% if seat.is_taken %}
         {{ seat.seat_number }} (Taken)
       {% else %}
-        <input type="checkbox" name="seat_ids" value="{{ seat.id }}" />
+        <input type="checkbox" name="seat_ids" value="{{ seat.id }}" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
         {{ seat.seat_number }}
       {% endif %}
     </label>
   {% empty %}
-    <p>No seats found.</p>
+    <p class="text-sm text-slate-500">No seats found.</p>
   {% endfor %}
-  <div style="margin-top: 16px;">
-    <button type="submit">Continue to checkout</button>
+  </div>
+  <div class="flex items-center justify-between">
+    <a href="/" class="text-sm font-medium text-slate-600 hover:text-slate-900">Back to movies</a>
+    <button
+      type="submit"
+      class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500"
+    >
+      Continue to checkout
+    </button>
   </div>
 </form>
 {% endblock %}

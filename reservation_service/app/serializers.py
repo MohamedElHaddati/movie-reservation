@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from rest_framework import serializers
 
-from .models import Movie, Reservation, Seat, Showtime
+from .models import Movie, Payment, Reservation, Seat, Showtime, Ticket
 
 
 class MovieSerializer(serializers.ModelSerializer):
@@ -23,13 +23,69 @@ class SeatSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class ReservationMovieSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Movie
+        fields = ["id", "title", "genre", "format", "duration_min", "poster_url"]
+
+
+class ReservationShowtimeSerializer(serializers.ModelSerializer):
+    movie = ReservationMovieSerializer(read_only=True)
+
+    class Meta:
+        model = Showtime
+        fields = ["id", "datetime", "hall", "movie"]
+
+
+class ReservationSeatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Seat
+        fields = ["id", "seat_number", "is_taken"]
+
+
+class ReservationPaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = ["amount", "currency", "status"]
+
+
+class ReservationTicketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ticket
+        fields = ["pdf_path", "generated_at"]
+
+
 class ReservationSerializer(serializers.ModelSerializer):
-    seats = serializers.PrimaryKeyRelatedField(many=True, queryset=Seat.objects.all())
+    seats = serializers.PrimaryKeyRelatedField(many=True, queryset=Seat.objects.all(), write_only=True)
+    seat_details = ReservationSeatSerializer(source="seats", many=True, read_only=True)
+    showtime_details = ReservationShowtimeSerializer(source="showtime", read_only=True)
+    payment = ReservationPaymentSerializer(read_only=True)
+    ticket = ReservationTicketSerializer(read_only=True)
 
     class Meta:
         model = Reservation
-        fields = ["id", "user", "showtime", "seats", "created_at", "status"]
-        read_only_fields = ["id", "user", "created_at", "status"]
+        fields = [
+            "id",
+            "user",
+            "showtime",
+            "showtime_details",
+            "seats",
+            "seat_details",
+            "created_at",
+            "status",
+            "payment",
+            "ticket",
+        ]
+        read_only_fields = [
+            "id",
+            "user",
+            "showtime_details",
+            "seat_details",
+            "created_at",
+            "status",
+            "payment",
+            "ticket",
+        ]
 
     def validate(self, attrs):
         showtime = attrs.get("showtime")

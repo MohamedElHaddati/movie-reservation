@@ -12,6 +12,7 @@ class Movie(models.Model):
     duration_min = models.PositiveIntegerField()
     genre = models.CharField(max_length=100)
     format = models.CharField(max_length=10, choices=Format.choices)
+    poster_url = models.URLField(max_length=500, blank=True, default="")
 
     def __str__(self):
         return self.title
